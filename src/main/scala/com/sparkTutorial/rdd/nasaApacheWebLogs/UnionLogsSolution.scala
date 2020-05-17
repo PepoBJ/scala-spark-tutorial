@@ -17,7 +17,7 @@ object UnionLogsSolution {
 
     val cleanLogLines = aggregatedLogLines.filter(line => isNotHeader(line))
 
-    val sample = cleanLogLines.sample(withReplacement = true, fraction = 0.1)
+    val sample = cleanLogLines.coalesce(1).sample(withReplacement = true, fraction = 0.05)
 
     sample.saveAsTextFile("out/sample_nasa_logs.csv")
   }

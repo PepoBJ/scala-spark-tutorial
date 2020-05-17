@@ -1,20 +1,23 @@
 package com.sparkTutorial.rdd.airports
 
+import com.sparkTutorial.commons.Utils
+import org.apache.spark.{SparkConf, SparkContext}
+
 object AirportsByLatitudeProblem {
 
   def main(args: Array[String]) {
 
-    /* Create a Spark program to read the airport data from in/airports.text,  find all the airports whose latitude are bigger than 40.
-       Then output the airport's name and the airport's latitude to out/airports_by_latitude.text.
+    val conf = new SparkConf().setAppName("airpots").setMaster("local[*]")
+    var sc = new SparkContext(conf)
 
-       Each row of the input file contains the following columns:
-       Airport ID, Name of airport, Main city served by airport, Country where airport is located, IATA/FAA code,
-       ICAO Code, Latitude, Longitude, Altitude, Timezone, DST, Timezone in Olson format
+    val airports = sc.textFile("in/airports.text")
+    val airportsLatitude = airports.filter(line => line.split(Utils.COMMA_DELIMITER)(6).toFloat >= 40)
 
-       Sample output:
-       "St Anthony", 51.391944
-       "Tofino", 49.082222
-       ...
-     */
+    val airportsAndLatitude = airportsLatitude.map(line => {
+      val splits = line.split(Utils.COMMA_DELIMITER)
+      splits(1) + ", " + splits(6)
+    })
+
+    airportsAndLatitude.saveAsTextFile("out/airport_with_latitude_more_than_40.text")
   }
 }

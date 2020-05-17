@@ -1,5 +1,10 @@
 package com.sparkTutorial.sparkSql
 
+import com.sparkTutorial.sparkSql.StackOverFlowSurvey.{AGE_MIDPOINT, SALARY_MIDPOINT, SALARY_MIDPOINT_BUCKET}
+import org.apache.log4j.{Level, Logger}
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions.{col, avg}
+
 
 object HousePriceProblem {
 
@@ -37,4 +42,24 @@ object HousePriceProblem {
         |................|.................|
         |................|.................|
          */
+
+
+  def main(args: Array[String]) {
+
+    Logger.getLogger("org").setLevel(Level.ERROR)
+    val session = SparkSession.builder().appName("StackOverFlowSurvey").master("local[1]").getOrCreate()
+
+    val dataFrameReader = session.read
+
+    val responses = dataFrameReader
+      .option("header", "true")
+      .option("inferSchema", value = true)
+      .csv("in/RealEstate.csv")
+
+    val resume = responses.groupBy(col("Location")).agg(avg("Price SQ Ft").cast("decimal(10,2)").as("avg"))
+      .orderBy(col("avg"))
+      .show()
+
+    session.stop()
+  }
 }
